@@ -1,11 +1,24 @@
 package com.andres.elevator;
 
-public class Entity {
+import java.awt.Graphics;
+
+public abstract class Entity {
 
 	protected int mWidth;
 	protected int mHeight;
 	protected int mX;
 	protected int mY;
+	protected int mSpeed = 100;
+	
+	public abstract void draw(Graphics graphics);
+	
+	protected void pause() {
+		try {
+			Thread.sleep(mSpeed);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	public int getWidth() {
 		return mWidth;
