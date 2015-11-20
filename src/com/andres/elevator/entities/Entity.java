@@ -1,4 +1,4 @@
-package com.andres.elevator;
+package com.andres.elevator.entities;
 
 import java.awt.Graphics;
 

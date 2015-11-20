@@ -1,12 +1,16 @@
-package com.andres.elevator;
+package com.andres.elevator.entities;
 
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
+import java.util.LinkedList;
 
 import javax.imageio.ImageIO;
+
+import com.andres.elevator.applet.Edificio;
+import com.andres.elevator.utils.Utils;
 
 public class Ascensor extends Entity implements Runnable {
 	
@@ -16,6 +20,7 @@ public class Ascensor extends Entity implements Runnable {
 
 	private BufferedImage mSprite;
 	
+	private LinkedList<Persona> mColaDeEspera;
 	private boolean mOcupado = false;
 	private Persona mPersonaSolicitante;
 	private Persona mPersonaMontada;
@@ -29,12 +34,14 @@ public class Ascensor extends Entity implements Runnable {
 	public Ascensor(Edificio edificio) {
 		mEdificio = edificio;
 		
+		mColaDeEspera = new LinkedList<Persona>();
+		
 		mSpeed = 100;
 		
 		mWidth = 40;
 		mHeight = 50;
 		mX = (mEdificio.getWidth() / 3) - (mWidth / 2);
-		mY = Utils.SUELO - mHeight;
+		mY = Utils.SUELO_PX - mHeight;
 		
 		URL spriteUrl = getClass().getResource("/resources/elevator.png");
 		try {
@@ -49,6 +56,7 @@ public class Ascensor extends Entity implements Runnable {
 	
 	public synchronized void solicitar(Persona personaSolicitante) {
 		System.out.println("Nuevo solicitante: " + personaSolicitante.getNombre());
+		mColaDeEspera.add(personaSolicitante);
 		while (mOcupado) {
 			try {
 				wait();
@@ -58,7 +66,7 @@ public class Ascensor extends Entity implements Runnable {
 		}
 		
 		mOcupado = true;
-		mPersonaSolicitante = personaSolicitante;
+		mPersonaSolicitante = mColaDeEspera.removeFirst();
 		System.out.println("Atendiendo a persona " + mPersonaSolicitante.getNombre());
 	}
 
@@ -70,10 +78,18 @@ public class Ascensor extends Entity implements Runnable {
 				// Despertar al siguiente hilo persona
 				synchronized (this) {
 					notify();
+					
+					try {
+						//System.out.println("Ascensor en estado de espera en planta: " + mPlantaActual);
+						// no-op
+						if (mColaDeEspera.size() <= 0)  {
+							mOcupado = false;
+							wait();
+						}
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
-				
-				//System.out.println("Ascensor en estado de espera en planta: " + mPlantaActual);
-				// no-op
 			} else {
 				
 				if (mPersonaMontada != null) {
@@ -85,7 +101,6 @@ public class Ascensor extends Entity implements Runnable {
 				}
 			}
 			
-			mEdificio.repaint();
 			pause();
 		}
 	}
@@ -122,11 +137,14 @@ public class Ascensor extends Entity implements Runnable {
 	}
 	
 	private void soltarPersona() {
-		mPersonaMontada.setX(mPersonaMontada.getX() + 10);
+		int incremento = getWidth() / 2 + mPersonaMontada.getWidth() / 2;
+		mPersonaMontada.setX(mPersonaMontada.getX() + incremento);
+		
+		String nombrePersona = mPersonaMontada.getNombre();
 		mPersonaMontada.haLlegado();
 		mPersonaSolicitante = null;
 		mPersonaMontada = null;
-		System.out.println("El usuario se baja del ascensor porque llega a su destino");
+		System.out.println("El usuario se baja del ascensor porque llega a su destino --------->" + nombrePersona);
 	}
 	
 	private void mover(int plantaDestino) {
@@ -149,17 +167,17 @@ public class Ascensor extends Entity implements Runnable {
 	
 	private void calcularPlantaActual() {
 		int ascensorBaseline = mY + mHeight;
-		if (ascensorBaseline == Utils.SUELO) {
+		if (ascensorBaseline == Utils.SUELO_PX) {
 			mPlantaActual = 0;
-		} else if (ascensorBaseline == Utils.SUELO - Utils.PLANTA_ALTURA*1) {
+		} else if (ascensorBaseline == Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*1) {
 			mPlantaActual = 1;
-		} else if (ascensorBaseline == Utils.SUELO - Utils.PLANTA_ALTURA*2) {
+		} else if (ascensorBaseline == Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*2) {
 			mPlantaActual = 2;
-		} else if (ascensorBaseline == Utils.SUELO - Utils.PLANTA_ALTURA*3) {
+		} else if (ascensorBaseline == Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*3) {
 			mPlantaActual = 3;
-		} else if (ascensorBaseline == Utils.SUELO - Utils.PLANTA_ALTURA*4) {
+		} else if (ascensorBaseline == Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*4) {
 			mPlantaActual = 4;
-		} else if (ascensorBaseline == Utils.SUELO - Utils.PLANTA_ALTURA*5) {
+		} else if (ascensorBaseline == Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*5) {
 			mPlantaActual = 5;
 		}	
 	}

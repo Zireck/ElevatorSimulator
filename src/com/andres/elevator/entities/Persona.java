@@ -1,7 +1,10 @@
-package com.andres.elevator;
+package com.andres.elevator.entities;
 
 import java.awt.Color;
 import java.awt.Graphics;
+
+import com.andres.elevator.applet.Edificio;
+import com.andres.elevator.utils.Utils;
 
 public class Persona extends Entity implements Runnable {
 	
@@ -22,7 +25,7 @@ public class Persona extends Entity implements Runnable {
 	
 	private Color mColor;
 	
-	public Persona(Edificio edificio, Ascensor ascensor) {
+	Persona(Edificio edificio, Ascensor ascensor) {
 		mEdificio = edificio;
 		mAscensor = ascensor;
 		
@@ -49,7 +52,7 @@ public class Persona extends Entity implements Runnable {
 	
 	public void setPlantaOrigen(int plantaOrigen) {
 		mPlantaOrigen = plantaOrigen;
-		mY = Utils.SUELO - Utils.PLANTA_ALTURA*mPlantaOrigen - mHeight;
+		mY = Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*mPlantaOrigen - mHeight;
 	}
 	
 	public int getPlantaDestino() {
@@ -85,6 +88,10 @@ public class Persona extends Entity implements Runnable {
 			pause();
 		}*/
 		
+		synchronized (mAscensor) {
+			mAscensor.notify();
+		}
+
 		mAscensor.solicitar(this);
 		
 		/*
@@ -113,7 +120,7 @@ public class Persona extends Entity implements Runnable {
 		
 		mHaFinalizado = true;
 		
-		System.out.println("Persona hilo muere.");
+		System.out.println("Persona hilo muere. -> " + getNombre());
 		Thread.currentThread().interrupt();
 	}
 	
