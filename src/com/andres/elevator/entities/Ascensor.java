@@ -3,6 +3,7 @@ package com.andres.elevator.entities;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.LinkedList;
 
 import javax.imageio.ImageIO;
 
@@ -18,6 +19,7 @@ public class Ascensor extends Entity implements Runnable {
 	
 	private Thread mThread;
 
+	private LinkedList<Persona> mColaDeEspera;
 	private boolean mOcupado = false;
 	private Persona mPersonaSolicitante;
 	private Persona mPersonaMontada;
@@ -31,6 +33,8 @@ public class Ascensor extends Entity implements Runnable {
 	
 	public Ascensor(Edificio edificio) {
 		mEdificio = edificio;
+		
+		mColaDeEspera = new LinkedList<Persona>();
 		
 		mSpeed = 100;
 		
@@ -64,6 +68,7 @@ public class Ascensor extends Entity implements Runnable {
 	
 	public synchronized void solicitar(Persona personaSolicitante) {
 		System.out.println("Nuevo solicitante: " + personaSolicitante.getNombre());
+		mColaDeEspera.add(personaSolicitante);
 		mSolicitantes++;
 		
 		while (mOcupado) {
@@ -75,7 +80,8 @@ public class Ascensor extends Entity implements Runnable {
 		}
 		
 		mOcupado = true;
-		mPersonaSolicitante = personaSolicitante;
+		//mPersonaSolicitante = personaSolicitante;
+		mPersonaSolicitante = mColaDeEspera.removeFirst();
 		System.out.println("Atendiendo a persona " + mPersonaSolicitante.getNombre());
 	}
 

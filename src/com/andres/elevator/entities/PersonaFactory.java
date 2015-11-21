@@ -16,11 +16,7 @@ public class PersonaFactory {
 		persona.setColor(generateRandomColor());
 		persona.setPlantaOrigen(generateRandomPlanta(edificio));
 		persona.setPlantaDestino(generateRandomPlantaDifferentFrom(persona.getPlantaOrigen()));
-		
-		String[] nombres = { "Carlos", "Sandra", "Maria", "Juan", "Cristina", "Merce", "Bea", "Raul", "Felipe", "Marta", "Santi", "Marcos", "Andres", "Luisa" };
-		int nnombre = Utils.getRandomValue(0, nombres.length-1);
-		persona.setNombre(nombres[nnombre]);
-		
+		persona.setNombre("Nuevo Nombre");
 		
 		return persona;
 	}
