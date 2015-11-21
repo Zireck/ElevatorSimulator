@@ -5,13 +5,15 @@ import java.awt.Graphics;
 import java.awt.Image;
 
 /**
+ * Fuente:
+ * ¿Cómo implementar double buffer en Java AWT?
  * http://www.codeproject.com/Articles/2136/Double-buffer-in-standard-Java-AWT
  * 
  * @author Andrés Hernández
  *
  */
 @SuppressWarnings("serial")
-public class DoubleBufferApplet extends Applet {
+public abstract class DoubleBufferApplet extends Applet {
 
 	private boolean mDoubleBuffer = true;
 	private int mBufferWidth;
@@ -19,10 +21,11 @@ public class DoubleBufferApplet extends Applet {
 	private Image mBufferImage;
 	private Graphics mBufferGraphics;
 	
-	// TODO
-	protected void paintBuffer(Graphics graphics) {
-		
+	public DoubleBufferApplet() {
+		// no-op
 	}
+	
+	protected abstract void paintBuffer(Graphics graphics);
 	
 	@Override
 	public void paint(Graphics graphics) {

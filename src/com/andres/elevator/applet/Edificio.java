@@ -19,19 +19,25 @@ public class Edificio extends DoubleBufferApplet implements Runnable {
 	
 	private Thread mThread;
 	
+	private Background mBackground;
 	private Ascensor mAscensor;
 	private List<Persona> mPersonas = new ArrayList<Persona>(MAX_PERSONAS);
 	private List<Boolean> mPlantasLibres = new ArrayList<Boolean>(MAX_PLANTAS);
 	
+	public Edificio() {
+		super();
+	}
+	
 	@Override
 	public void init() {
-		setSize(640, 400);
+		setSize(720, 480);
 		setVisible(true);
 
 		for (int i=0; i<MAX_PLANTAS; i++) {
 			mPlantasLibres.add(true);
 		}
 		
+		mBackground = new Background();
 		mAscensor = new Ascensor(this);
 		
 		mThread = new Thread(this);
@@ -50,12 +56,12 @@ public class Edificio extends DoubleBufferApplet implements Runnable {
 	@Override
 	public void run() {
 		long initTime = System.currentTimeMillis();
-		long delta = Utils.getRandomValue(1000, 3000);
+		long delta = Utils.getRandomValue(2000, 3000);
 		while (true) {
 			
 			if (System.currentTimeMillis() - initTime > delta) {
 				initTime = System.currentTimeMillis();
-				delta = Utils.getRandomValue(1000, 3000);
+				delta = Utils.getRandomValue(3000, 3000);
 				eliminarPersonasFinalizadas();
 				crearNuevaPersonaSiFueraNecesario();
 			}
@@ -82,7 +88,7 @@ public class Edificio extends DoubleBufferApplet implements Runnable {
 		while (iteratorPersonas.hasNext()) {
 			Persona persona = iteratorPersonas.next();
 			if (persona.haFinalizado()) {
-				mPlantasLibres.set(persona.getPlantaDestino(), true);
+				//mPlantasLibres.set(persona.getPlantaDestino(), true);
 				persona = null;
 				iteratorPersonas.remove();
 			}
@@ -90,7 +96,14 @@ public class Edificio extends DoubleBufferApplet implements Runnable {
 	}
 	
 	private void crearNuevaPersonaSiFueraNecesario() {
-		if (mPersonas.size() < MAX_PERSONAS) {
+		boolean algunaPlantaLibre = false;
+		for (int i=0; i<mPlantasLibres.size(); i++) {
+			if (mPlantasLibres.get(i)) {
+				algunaPlantaLibre = true;
+			}
+		}
+		
+		if (mPersonas.size() < MAX_PERSONAS && algunaPlantaLibre) {
 			Persona persona = PersonaFactory.newInstance(this, mAscensor);
 			mPlantasLibres.set(persona.getPlantaOrigen(), false);
 			persona.executeThread();
@@ -112,34 +125,20 @@ public class Edificio extends DoubleBufferApplet implements Runnable {
 			return;
 		}
 		
-		graphics.setColor(Color.CYAN);
-		graphics.fillRect(0, 0, getWidth(), Utils.SUELO_PX);
-		
-		graphics.setColor(Color.DARK_GRAY);
-		graphics.fillRect(0, Utils.SUELO_PX, getWidth(), getHeight() - Utils.SUELO_PX);
-		
-		int floorWidth = 3;
-		graphics.setColor(Color.DARK_GRAY);
-		graphics.fillRect(0, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*1, getWidth() / 3 - mAscensor.getWidth() / 2, floorWidth);
-		graphics.fillRect(0, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*2, getWidth() / 3 - mAscensor.getWidth() / 2, floorWidth);
-		graphics.fillRect(0, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*3, getWidth() / 3 - mAscensor.getWidth() / 2, floorWidth);
-		graphics.fillRect(0, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*4, getWidth() / 3 - mAscensor.getWidth() / 2, floorWidth);
-		graphics.fillRect(0, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*5, getWidth() / 3 - mAscensor.getWidth() / 2, floorWidth);
-		
-		graphics.fillRect(getWidth()/3 + mAscensor.getWidth()/2, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*1, getWidth() / 4, floorWidth);
-		graphics.fillRect(getWidth()/3 + mAscensor.getWidth()/2, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*2, getWidth() / 4, floorWidth);
-		graphics.fillRect(getWidth()/3 + mAscensor.getWidth()/2, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*3, getWidth() / 4, floorWidth);
-		graphics.fillRect(getWidth()/3 + mAscensor.getWidth()/2, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*4, getWidth() / 4, floorWidth);
-		graphics.fillRect(getWidth()/3 + mAscensor.getWidth()/2, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*5, getWidth() / 4, floorWidth);
-		
-		graphics.fillRect(getWidth()/3 + mAscensor.getWidth()/2 + getWidth() / 4, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*6, 5, Utils.PLANTA_ALTURA_PX*5 + 3);
-		
-		mAscensor.draw(graphics);
+		mBackground.drawBehindCharacter(graphics, getWidth(), getHeight(), mAscensor.getWidth());
 		
 		for (Persona persona : mPersonas) {
 			if (persona != null) {
 				persona.draw(graphics);
 			}
-		}		
+		}
+		
+		mBackground.drawInFrontOfCharacter(graphics, getWidth(), getHeight(), mAscensor.getWidth());
+		
+		mAscensor.draw(graphics);
+	}
+	
+	public void setIndicator(int plantaOrigen, int plantaDestino) {
+		mBackground.setIndicator(plantaOrigen, plantaDestino);
 	}
 }
