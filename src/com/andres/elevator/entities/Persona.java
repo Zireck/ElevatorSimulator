@@ -1,36 +1,41 @@
 package com.andres.elevator.entities;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-
-import javax.imageio.ImageIO;
 
 import com.andres.elevator.applet.Edificio;
 import com.andres.elevator.utils.Utils;
 
-public class Persona extends Entity implements Runnable {
+public abstract class Persona extends Entity implements Runnable {
 	
-	private static final int IDLE = 0;
-	private static final int WALKING = 1;
-	private static final int[] NUM_FRAMES_PER_SPRITE_ARRAY = { 1, 3 };
+	protected static final int IDLE_TINY = 0;
+	protected static final int WALKING_TINY = 1;
+	protected static final int IDLE_REGULAR = 2;
+	protected static final int WALKING_REGULAR = 3;
+	protected static final int WALKING_REGULAR_FIRE = 4;
+	protected static final int DEAD_TINY = 5; 
+	protected static final int[] NUM_FRAMES_PER_SPRITE_ARRAY = { 1, 3, 1, 3, 3, 1 };
 	
-	private BufferedImage mSpriteSheet;
-	private List<BufferedImage[]> mSprites;
-	private Animation mAnimation;
-	private int mCurrentAction;
+	protected static final int STATE_TINY = 0;
+	protected static final int STATE_REGULAR = 1;
+	protected static final int STATE_FIRE = 2;
+	protected static final int STATE_DEAD = 3;
+	
+	protected BufferedImage mSpriteSheet;
+	protected List<BufferedImage[]> mSprites;
+	protected Animation mAnimation;
+	protected int mCurrentAction;
+	protected int mCurrentState;
 	
 	private Thread mThread;
 	
 	private Edificio mEdificio;
 	private Ascensor mAscensor;
 	
-	private String mNombre;
 	private int mPlantaOrigen;
 	private int mPlantaDestino;
+	private int mPlantaActual;
 	
 	private boolean mHaEntradoEnAscensor = false;
 	private boolean mHaLlegado = false;
@@ -38,51 +43,36 @@ public class Persona extends Entity implements Runnable {
 	
 	private final int mMovimiento = 1;
 	
-	private Color mColor;
-	
 	Persona(Edificio edificio, Ascensor ascensor) {
 		mEdificio = edificio;
 		mAscensor = ascensor;
 		
-		mSpeed = 10;
-		
-		mWidth = 20;
-		mHeight = 16;
+		//mSpeed = 10;
+		mSpeed = Utils.getRandomValue(8, 15);
 		
 		loadSprites();
 		mAnimation = new Animation();
-		mCurrentAction = WALKING;
-		mAnimation.setFrames(mSprites.get(WALKING));
+		mCurrentAction = WALKING_TINY;
+		mCurrentState = STATE_TINY;
+		mAnimation.setFrames(mSprites.get(WALKING_TINY));
 		mAnimation.setDelay(mSpeed);
+		startWalking();
+		
+		//mWidth = 20;
+		//mHeight = 16;
+		mWidth = mAnimation.getImage().getWidth();
+		mHeight = mAnimation.getImage().getHeight();
 		
 		mX = 0;
 		
 		mThread = new Thread(this);
 	}
 	
-	private void loadSprites() {
-		try {
-			mSpriteSheet = ImageIO.read(getClass().getResource("/resources/spritesheetcharacters.png"));
-			mSprites = new ArrayList<BufferedImage[]>();
-			BufferedImage[] spritesIdle = new BufferedImage[NUM_FRAMES_PER_SPRITE_ARRAY[IDLE]];
-			BufferedImage[] spritesWalking = new BufferedImage[NUM_FRAMES_PER_SPRITE_ARRAY[WALKING]];
-			spritesIdle[0] = mSpriteSheet.getSubimage(80, 32, 16, 16);
-			spritesWalking[0] = mSpriteSheet.getSubimage(96, 32, 16, 16);
-			spritesWalking[1] = mSpriteSheet.getSubimage(112, 32, 16, 16);
-			spritesWalking[2] = mSpriteSheet.getSubimage(128, 32, 16, 16);
-			mSprites.add(spritesIdle);
-			mSprites.add(spritesWalking);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+	protected abstract String getNombre();
+	protected abstract void loadSprites();
 	
 	public void executeThread() {
 		mThread.start();
-	}
-	
-	public String getNombre() {
-		return mNombre;
 	}
 	
 	public int getPlantaOrigen() {
@@ -91,7 +81,8 @@ public class Persona extends Entity implements Runnable {
 	
 	public void setPlantaOrigen(int plantaOrigen) {
 		mPlantaOrigen = plantaOrigen;
-		mY = Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*mPlantaOrigen - mHeight;
+		//mY = Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*mPlantaOrigen - mHeight;
+		mY = Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*mPlantaOrigen - mAnimation.getImage().getHeight();
 	}
 	
 	public int getPlantaDestino() {
@@ -102,31 +93,19 @@ public class Persona extends Entity implements Runnable {
 		mPlantaDestino = plantaDestino;
 	}
 	
-	public void setNombre(String nombre) {
-		mNombre = nombre;
-	}
-	
-	public void setColor(Color color) {
-		mColor = color;
-	}
-	
 	public void haLlegado() {
 		mHaLlegado = true;
 	}
 	
 	@Override
 	public void run() {
-		while (mX + getWidth() <= mAscensor.getX()) {
+		mPlantaActual = mPlantaOrigen;
+		startWalking();
+		while (mX + getWidth() < mAscensor.getX()) {
 			mX += mMovimiento;
 			mAnimation.update();
 			pause();			
 		}
-		
-		/*
-		while (mX <= mEdificio.getWidth() / 3 - mAscensor.getWidth()) {
-			mX += mMovimiento;
-			pause();
-		}*/
 		
 		synchronized (mAscensor) {
 			mAscensor.notify();
@@ -134,46 +113,34 @@ public class Persona extends Entity implements Runnable {
 
 		mEdificio.setIndicator(mPlantaOrigen, mPlantaDestino);
 		
-		mCurrentAction = IDLE;
-		mAnimation.setFrames(mSprites.get(IDLE));
+		stopWalking();
 		
 		mAscensor.solicitar(this);
 		
-		/*
-		while (!mHaEntradoEnAscensor) {
-			mX += mMovimiento;
-			if (mX >= mAscensor.getX() + mAscensor.getWidth() / 2) {
-				mHaEntradoEnAscensor = true;
-			}
-			pause();
-		}*/
-		/*
-		do {
-			mX += mMovimiento;
-			pause();
-		} while (mX < mAscensor.getX() + mAscensor.getWidth() / 2);
-		mHaEntradoEnAscensor = true;*/
-		
 		while (!mHaLlegado) {
-			// no-op
 			pause();
 		}
 		
+		mPlantaActual = mPlantaDestino;
 		mEdificio.setIndicator(mPlantaOrigen, -1);
 		mEdificio.setPlantaAvailable(mPlantaOrigen, true);
-		mCurrentAction = WALKING;
-		mAnimation.setFrames(mSprites.get(WALKING));
-		while (mX < mEdificio.getWidth()) {
-			mX += mMovimiento;
-			if (mX > mEdificio.getWidth()/3 + mAscensor.getWidth()/2 + mEdificio.getWidth()/4 - 28 - 6) {
-				entrarEnTuberia();
+		
+		startWalking();
+		
+		while (mX < mEdificio.getWidth() && mY < mEdificio.getHeight()) {
+			if (mCurrentState == STATE_DEAD) {
+				mY += mMovimiento;
+			} else {
+				mX += mMovimiento;
+				if (mX > mEdificio.getWidth()/3 + mAscensor.getWidth()/2 + mEdificio.getWidth()/4 - 28 - 6) {
+					entrarEnTuberia();
+				}
 			}
 			pause();
 		}
 		
 		mHaFinalizado = true;
 		
-		System.out.println("Persona hilo muere. -> " + getNombre());
 		mSpriteSheet = null;
 		mSprites = null;
 		mAnimation = null;
@@ -182,7 +149,7 @@ public class Persona extends Entity implements Runnable {
 	}
 	
 	private void entrarEnTuberia() {
-		mY = Utils.SUELO_PX - mHeight;
+		mY = Utils.SUELO_PX - mAnimation.getImage().getHeight();
 	}
 	
 	@Override
@@ -198,7 +165,6 @@ public class Persona extends Entity implements Runnable {
 		while (mX < mAscensor.getX() + mAscensor.getWidth() / 2) {
 			mX += mMovimiento;
 		}
-		
 	}
 	
 	public boolean haEntradoEnAscensor() {
@@ -207,5 +173,62 @@ public class Persona extends Entity implements Runnable {
 	
 	public boolean haFinalizado() {
 		return mHaFinalizado;
+	}
+	
+	private void stopWalking() {
+		if (mCurrentState == STATE_TINY) {
+			mCurrentAction = IDLE_TINY;
+		} else if (mCurrentState == STATE_REGULAR) {
+			mCurrentAction = IDLE_REGULAR;
+		}
+		mAnimation.setFrames(mSprites.get(mCurrentAction));
+	}
+	
+	private void startWalking() {
+		if (mCurrentState == STATE_TINY) {
+			mCurrentAction = WALKING_TINY;
+		} else if (mCurrentState == STATE_REGULAR) {
+			mCurrentAction = WALKING_REGULAR;
+		}
+		mAnimation.setFrames(mSprites.get(mCurrentAction));
+	}
+	
+	private void eatMushroom() {
+		mCurrentState = STATE_REGULAR;
+		mCurrentAction = WALKING_REGULAR;
+		mAnimation.setFrames(mSprites.get(mCurrentAction));
+	}
+	
+	private void eatFlower() {
+		mCurrentState = STATE_FIRE;
+		mCurrentAction = WALKING_REGULAR_FIRE;
+		mAnimation.setFrames(mSprites.get(mCurrentAction));
+	}
+	
+	private void die() {
+		mCurrentState = STATE_DEAD;
+		mCurrentAction = DEAD_TINY;
+		mAnimation.setFrames(mSprites.get(mCurrentAction));
+		mSpeed = 3;
+	}
+	
+	public void consumePrize(Prize prize) {
+		if (prize instanceof Mushroom) {
+			eatMushroom();
+		} else if (prize instanceof Flower) {
+			eatFlower();
+		} else if (prize instanceof Enemy) {
+			die();
+		}
+		mHeight = mAnimation.getImage().getHeight();
+		mY = Utils.SUELO_PX - mHeight - mPlantaActual*Utils.PLANTA_ALTURA_PX;
+	}
+	
+	public int getPlantaActual() {
+		return mPlantaActual;
+	}
+	
+	public boolean isDead() {
+		return mCurrentState == STATE_DEAD;
 	}
 }

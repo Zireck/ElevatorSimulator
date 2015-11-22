@@ -1,6 +1,5 @@
 package com.andres.elevator.entities;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -11,23 +10,19 @@ import com.andres.elevator.utils.Utils;
 public class PersonaFactory {
 
 	public static Persona newInstance(Edificio edificio, Ascensor ascensor) {
-		Persona persona = new Persona(edificio, ascensor);
+		Persona persona;
 		
-		persona.setColor(generateRandomColor());
+		int characterRandom = Utils.getRandomValue(0, 1);
+		if (characterRandom == 0) {
+			persona = new Mario(edificio, ascensor);
+		} else {
+			persona = new Luigi(edificio, ascensor);
+		}
+		
 		persona.setPlantaOrigen(generateRandomPlanta(edificio));
 		persona.setPlantaDestino(generateRandomPlantaDifferentFrom(persona.getPlantaOrigen()));
-		persona.setNombre("Nuevo Nombre");
 		
 		return persona;
-	}
-	
-	private static Color generateRandomColor() {
-		Random random = new Random();
-		int r = random.nextInt(255);
-		int g = random.nextInt(255);
-		int b = random.nextInt(255);
-		
-		return new Color(r, g, b);
 	}
 	
 	private static int generateRandomPlanta() {
@@ -49,23 +44,6 @@ public class PersonaFactory {
 		
 		int n = Utils.getRandomValue(0, plantasLibres.size()-1);
 		return plantasLibres.get(n);
-		
-		/*
-		int planta;
-		boolean plantaValida = true;
-		int i = 0;
-		
-		do {
-			System.out.println("[k9d3] generateRandomPlanta: " + i);
-			plantaValida = true;
-			planta = generateRandomPlanta();
-			if (!edificio.isPlantaAvailable(planta)) {
-				plantaValida = false;
-			}
-			i++;
-		} while (!plantaValida && i<=Utils.PLANTA_MAX);
-		
-		return planta;*/
 	}
 	
 	private static int generateRandomPlantaDifferentFrom(int planta) {
@@ -73,7 +51,6 @@ public class PersonaFactory {
 		int i = 0;
 		
 		do {
-			System.out.println("[k9d3] generateRandomPlantaDifferentFrom: " + i);
 			nuevaPlanta = generateRandomPlanta();
 			i++;
 		} while (nuevaPlanta == planta && i<=Utils.PLANTA_MAX);

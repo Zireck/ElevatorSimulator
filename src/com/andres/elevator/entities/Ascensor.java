@@ -45,22 +45,10 @@ public class Ascensor extends Entity implements Runnable {
 			e.printStackTrace();
 		}
 		
-		//mWidth = 40;
-		//mHeight = 50;
 		mWidth = mElevatorCloud.getWidth();
 		mHeight = mElevatorCloud.getHeight();
 		mX = (mEdificio.getWidth() / 3) - (mWidth / 2);
 		mY = Utils.SUELO_PX;
-		
-
-		
-		/*
-		URL spriteUrl = getClass().getResource("/resources/elevator.png");
-		try {
-			mSprite = ImageIO.read(spriteUrl);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}*/
 		
 		mThread = new Thread(this);
 		mThread.start();
@@ -168,7 +156,7 @@ public class Ascensor extends Entity implements Runnable {
 		mPersonaMontada.haLlegado();
 		mPersonaSolicitante = null;
 		mPersonaMontada = null;
-		System.out.println("El usuario se baja del ascensor porque llega a su destino --->" + nombrePersona);
+		System.out.println("El usuario se baja del ascensor porque llega a su destino ---> " + nombrePersona);
 	}
 	
 	private void mover(int plantaDestino) {
@@ -214,10 +202,6 @@ public class Ascensor extends Entity implements Runnable {
 	@Override
 	public void draw(Graphics graphics) {
 		mX = (mEdificio.getWidth() / 3) - (mWidth / 2);
-		/*graphics.setColor(Color.GRAY);
-		graphics.fillRect(mX, mY, mWidth, mHeight);*/
 		graphics.drawImage(mElevatorCloud, mX, mY, null);
-		
-		//graphics.drawImage(mSprite, mX, mY, null);
 	}
 }
