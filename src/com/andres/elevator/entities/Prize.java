@@ -6,8 +6,15 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import com.andres.elevator.utils.Utils;
+import com.andres.elevator.utils.GameUtils;
 
+/**
+ * Clase que representa un premio.
+ * Éstos pueden ser: una seta, una flor o un enemigo.
+ * 
+ * @author Andrés Hernández Jiménez
+ *
+ */
 public abstract class Prize extends Entity {
 	
 	private BufferedImage mSpriteSheet;
@@ -46,13 +53,16 @@ public abstract class Prize extends Entity {
 	
 	public void setPlanta(int planta) {
 		mPlanta = planta;
-		setY(Utils.SUELO_PX - getHeight() - planta*Utils.PLANTA_ALTURA_PX);
+		setY(GameUtils.SUELO_PX - getHeight() - planta*GameUtils.PLANTA_ALTURA_PX);
 	}
 	
 	public int getPlanta() {
 		return mPlanta;
 	}
 
+	/**
+	 * Establece el premio como consumido.
+	 */
 	public void consume() {
 		mIsConsumed = true;
 	}

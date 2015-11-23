@@ -4,10 +4,16 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
-import com.andres.elevator.applet.Edificio;
-import com.andres.elevator.utils.Utils;
+import com.andres.elevator.applet.Game;
+import com.andres.elevator.utils.GameUtils;
 
-public abstract class Persona extends Entity implements Runnable {
+/**
+ * Clase que representa un personaje que se moverá por pantalla y solicitará el ascensor.
+ * 
+ * @author Andrés Hernández Jiménez
+ *
+ */
+public abstract class Character extends Entity implements Runnable {
 	
 	protected static final int IDLE_TINY = 0;
 	protected static final int WALKING_TINY = 1;
@@ -30,7 +36,7 @@ public abstract class Persona extends Entity implements Runnable {
 	
 	private Thread mThread;
 	
-	private Edificio mEdificio;
+	private Game mGame;
 	private Ascensor mAscensor;
 	
 	private int mPlantaOrigen;
@@ -43,12 +49,12 @@ public abstract class Persona extends Entity implements Runnable {
 	
 	private final int mMovimiento = 1;
 	
-	Persona(Edificio edificio, Ascensor ascensor) {
-		mEdificio = edificio;
+	Character(Game game, Ascensor ascensor) {
+		mGame = game;
 		mAscensor = ascensor;
 		
-		//mSpeed = 10;
-		mSpeed = Utils.getRandomValue(8, 15);
+		// Se determina una velocidad aleatoria para el personaje.
+		mSpeed = GameUtils.getRandomValue(8, 15);
 		
 		loadSprites();
 		mAnimation = new Animation();
@@ -58,8 +64,6 @@ public abstract class Persona extends Entity implements Runnable {
 		mAnimation.setDelay(mSpeed);
 		startWalking();
 		
-		//mWidth = 20;
-		//mHeight = 16;
 		mWidth = mAnimation.getImage().getWidth();
 		mHeight = mAnimation.getImage().getHeight();
 		
@@ -68,9 +72,17 @@ public abstract class Persona extends Entity implements Runnable {
 		mThread = new Thread(this);
 	}
 	
-	protected abstract String getNombre();
+	/**
+	 * Carga en memoria la imagen del jugador.
+	 * La clase hijo será la encargada de cargar la imagen oportuna.
+	 */
 	protected abstract void loadSprites();
 	
+	protected abstract String getNombre();
+	
+	/**
+	 * Inicia la ejecución del hilo.
+	 */
 	public void executeThread() {
 		mThread.start();
 	}
@@ -81,8 +93,7 @@ public abstract class Persona extends Entity implements Runnable {
 	
 	public void setPlantaOrigen(int plantaOrigen) {
 		mPlantaOrigen = plantaOrigen;
-		//mY = Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*mPlantaOrigen - mHeight;
-		mY = Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*mPlantaOrigen - mAnimation.getImage().getHeight();
+		mY = GameUtils.SUELO_PX - GameUtils.PLANTA_ALTURA_PX*mPlantaOrigen - mAnimation.getImage().getHeight();
 	}
 	
 	public int getPlantaDestino() {
@@ -93,6 +104,9 @@ public abstract class Persona extends Entity implements Runnable {
 		mPlantaDestino = plantaDestino;
 	}
 	
+	/**
+	 * Notifica al personaje que ha llegado satisfactoriamente a la planta de destino.
+	 */
 	public void haLlegado() {
 		mHaLlegado = true;
 	}
@@ -100,47 +114,59 @@ public abstract class Persona extends Entity implements Runnable {
 	@Override
 	public void run() {
 		mPlantaActual = mPlantaOrigen;
+		
+		// El personaje comienza a andar, y continua haciéndolo hasta llegar al final
+		// de la plataforma donde se encuentra, es decir, justo antes del ascensor.
 		startWalking();
 		while (mX + getWidth() < mAscensor.getX()) {
 			mX += mMovimiento;
 			mAnimation.update();
 			pause();			
 		}
+
+		// El personaje se detiene.
+		stopWalking();
 		
+		// Se establece el indicador con la planta a la que el personaje desea ir. 
+		mGame.setIndicator(mPlantaOrigen, mPlantaDestino);
+		
+		// El personaje despierta al ascensor (en caso de que estuviera dormido).
 		synchronized (mAscensor) {
 			mAscensor.notify();
 		}
 
-		mEdificio.setIndicator(mPlantaOrigen, mPlantaDestino);
-		
-		stopWalking();
-		
+		// Solicita el ascensor.
 		mAscensor.solicitar(this);
 		
 		while (!mHaLlegado) {
 			pause();
 		}
 		
+		// Actualizamos la planta actual, limpiamos el indicador de la planta de origen y
+		// notificamos que la planta de origen está disponible para que pueda entrar otro personaje.
 		mPlantaActual = mPlantaDestino;
-		mEdificio.setIndicator(mPlantaOrigen, -1);
-		mEdificio.setPlantaAvailable(mPlantaOrigen, true);
+		mGame.setIndicator(mPlantaOrigen, -1);
+		mGame.setPlantaSinJugadores(mPlantaOrigen, true);
 		
+		// El personaje retoma su marcha y lo hace hasta que sale de la pantalla.
+		// Bien sea por haber terminado su trayecto o por haber muerto en el camino.
 		startWalking();
-		
-		while (mX < mEdificio.getWidth() && mY < mEdificio.getHeight()) {
+		while (mX < mGame.getWidth() && mY < mGame.getHeight()) {
 			if (mCurrentState == STATE_DEAD) {
 				mY += mMovimiento;
 			} else {
 				mX += mMovimiento;
-				if (mX > mEdificio.getWidth()/3 + mAscensor.getWidth()/2 + mEdificio.getWidth()/4 - 28 - 6) {
+				if (mX > mGame.getWidth()/3 + mAscensor.getWidth()/2 + mGame.getWidth()/4 - 28 - 6) {
 					entrarEnTuberia();
 				}
 			}
+			
+			mAnimation.update();
+			
 			pause();
 		}
 		
 		mHaFinalizado = true;
-		
 		mSpriteSheet = null;
 		mSprites = null;
 		mAnimation = null;
@@ -148,40 +174,27 @@ public abstract class Persona extends Entity implements Runnable {
 		Thread.currentThread().interrupt();
 	}
 	
+	/**
+	 * El personaje entra en la tubería, actualizándole sus coordenadas a donde corresponde.
+	 */
 	private void entrarEnTuberia() {
-		mY = Utils.SUELO_PX - mAnimation.getImage().getHeight();
+		mY = GameUtils.SUELO_PX - mAnimation.getImage().getHeight();
 	}
 	
 	@Override
 	public void draw(Graphics graphics) {
-		/*graphics.setColor(mColor);
-		graphics.fillRect(mX, mY, mWidth, mHeight);*/
 		if (mAnimation != null) {
 			graphics.drawImage(mAnimation.getImage(), mX, mY, null);
 		}
 	}
 	
+	/**
+	 * El personaje entra en el ascensor, actualizándole sus coordenadas a donde corresponde.
+	 */
 	public void entrarEnAscensor() {
 		while (mX < mAscensor.getX() + mAscensor.getWidth() / 2) {
 			mX += mMovimiento;
 		}
-	}
-	
-	public boolean haEntradoEnAscensor() {
-		return mHaEntradoEnAscensor;
-	}
-	
-	public boolean haFinalizado() {
-		return mHaFinalizado;
-	}
-	
-	private void stopWalking() {
-		if (mCurrentState == STATE_TINY) {
-			mCurrentAction = IDLE_TINY;
-		} else if (mCurrentState == STATE_REGULAR) {
-			mCurrentAction = IDLE_REGULAR;
-		}
-		mAnimation.setFrames(mSprites.get(mCurrentAction));
 	}
 	
 	private void startWalking() {
@@ -193,10 +206,37 @@ public abstract class Persona extends Entity implements Runnable {
 		mAnimation.setFrames(mSprites.get(mCurrentAction));
 	}
 	
+	private void stopWalking() {
+		if (mCurrentState == STATE_TINY) {
+			mCurrentAction = IDLE_TINY;
+		} else if (mCurrentState == STATE_REGULAR) {
+			mCurrentAction = IDLE_REGULAR;
+		}
+		mAnimation.setFrames(mSprites.get(mCurrentAction));
+	}
+	
+	/**
+	 * El personaje consume un premio.
+	 * 
+	 * @param prize Premio a consumir.
+	 */
+	public void consumePrize(Prize prize) {
+		if (prize instanceof Mushroom) {
+			eatMushroom();
+		} else if (prize instanceof Flower) {
+			eatFlower();
+		} else if (prize instanceof Enemy) {
+			die();
+		}
+		mHeight = mAnimation.getImage().getHeight();
+		mY = GameUtils.SUELO_PX - mHeight - mPlantaActual*GameUtils.PLANTA_ALTURA_PX;
+	}
+	
 	private void eatMushroom() {
 		mCurrentState = STATE_REGULAR;
 		mCurrentAction = WALKING_REGULAR;
 		mAnimation.setFrames(mSprites.get(mCurrentAction));
+		System.out.println("k9d3 array sprites length: " + mSprites.get(mCurrentAction).length);
 	}
 	
 	private void eatFlower() {
@@ -212,16 +252,12 @@ public abstract class Persona extends Entity implements Runnable {
 		mSpeed = 3;
 	}
 	
-	public void consumePrize(Prize prize) {
-		if (prize instanceof Mushroom) {
-			eatMushroom();
-		} else if (prize instanceof Flower) {
-			eatFlower();
-		} else if (prize instanceof Enemy) {
-			die();
-		}
-		mHeight = mAnimation.getImage().getHeight();
-		mY = Utils.SUELO_PX - mHeight - mPlantaActual*Utils.PLANTA_ALTURA_PX;
+	public boolean haEntradoEnAscensor() {
+		return mHaEntradoEnAscensor;
+	}
+	
+	public boolean haFinalizado() {
+		return mHaFinalizado;
 	}
 	
 	public int getPlantaActual() {

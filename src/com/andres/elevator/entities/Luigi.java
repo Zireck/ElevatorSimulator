@@ -6,12 +6,12 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
-import com.andres.elevator.applet.Edificio;
+import com.andres.elevator.applet.Game;
 
-public class Luigi extends Persona {
+public class Luigi extends Character {
 
-	Luigi(Edificio edificio, Ascensor ascensor) {
-		super(edificio, ascensor);
+	Luigi(Game game, Ascensor ascensor) {
+		super(game, ascensor);
 	}
 
 	@Override
@@ -24,7 +24,7 @@ public class Luigi extends Persona {
 			BufferedImage[] spritesIdleRegular = new BufferedImage[NUM_FRAMES_PER_SPRITE_ARRAY[IDLE_REGULAR]];
 			BufferedImage[] spritesWalkingRegular = new BufferedImage[NUM_FRAMES_PER_SPRITE_ARRAY[WALKING_REGULAR]];
 			BufferedImage[] spritesWalkingRegularFire = new BufferedImage[NUM_FRAMES_PER_SPRITE_ARRAY[WALKING_REGULAR_FIRE]];
-			BufferedImage[] spritesDeadTiny= new BufferedImage[NUM_FRAMES_PER_SPRITE_ARRAY[DEAD_TINY]];
+			BufferedImage[] spritesDeadTiny = new BufferedImage[NUM_FRAMES_PER_SPRITE_ARRAY[DEAD_TINY]];
 			spritesIdleTiny[0] = mSpriteSheet.getSubimage(80, 80, 16, 16);
 			spritesWalkingTiny[0] = mSpriteSheet.getSubimage(96, 80, 16, 16);
 			spritesWalkingTiny[1] = mSpriteSheet.getSubimage(112, 80, 16, 16);

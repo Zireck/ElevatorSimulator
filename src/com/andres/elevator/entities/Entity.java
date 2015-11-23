@@ -3,6 +3,14 @@ package com.andres.elevator.entities;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 
+/**
+ * Clase abstracta que representa cualquier elemento "vivo" del juego.
+ * Es decir, que esté situado en unas coordenadas determinadas con un tamaño específico,
+ * y sea susceptible a interacciones con otras Entities.
+ * 
+ * @author Andrés Hernández Jiménez
+ *
+ */
 public abstract class Entity {
 
 	protected int mWidth;
@@ -11,6 +19,10 @@ public abstract class Entity {
 	protected int mY;
 	protected int mSpeed = 100;
 	
+	/**
+	 * Método abstracto que se encarga de dibujar la Entity en pantalla.
+	 * @param graphics Objeto graphics donde se dibujará.
+	 */
 	public abstract void draw(Graphics graphics);
 	
 	protected void pause() {
@@ -21,6 +33,11 @@ public abstract class Entity {
 		}
 	}
 	
+	/**
+	 * Comprueba si la Entity actual está en colisión con otra Entity dada.
+	 * @param otherEntity La otra Entity sobre la que comprobaremos la colisión.
+	 * @return true si están en colisión, false en caso contrario.
+	 */
 	public boolean isCollidingWith(Entity otherEntity) {
 		Rectangle rectangle1 = new Rectangle(mX, mY, mWidth, mHeight);
 		Rectangle rectangle2 = new Rectangle(otherEntity.getX(), otherEntity.getY(), otherEntity.getWidth(), otherEntity.getHeight());

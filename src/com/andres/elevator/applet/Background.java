@@ -9,8 +9,15 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import com.andres.elevator.utils.Utils;
+import com.andres.elevator.utils.GameUtils;
 
+/**
+ * Clase encargada de dibujar en pantalla el fondo del juego, así como
+ * los decorados y los indicadores de solicitud del ascensor.
+ * 
+ * @author Andrés Hernández Jiménez
+ *
+ */
 public class Background {
 	
 	private static final int TILE_SIZE = 16;
@@ -44,11 +51,10 @@ public class Background {
 	
 	private List<Integer> mIndicators;
 	
-
 	public Background() {
-		mNumbers = new BufferedImage[Utils.PLANTA_MAX];
+		mNumbers = new BufferedImage[GameUtils.PLANTA_MAX];
 		mIndicators = new ArrayList<>();
-		for (int i=0; i<Utils.PLANTA_MAX; i++) {
+		for (int i=0; i<GameUtils.PLANTA_MAX; i++) {
 			mIndicators.add(-1);
 		}
 		
@@ -88,6 +94,13 @@ public class Background {
 		}
 	}
 	
+	/**
+	 * Dibuja en pantalla lo que estará detrás de los personajes.
+	 * @param graphics
+	 * @param parentWidth
+	 * @param parentHeight
+	 * @param ascensorWidth
+	 */
 	public void drawBehindCharacter(Graphics graphics, int parentWidth, int parentHeight, int ascensorWidth) {
 		// SKY
 		graphics.setColor(Color.decode(Background.COLOR_BACKGROUND));
@@ -96,58 +109,62 @@ public class Background {
 		// LAVA
 		int lavaHorizontalTimes = parentWidth / mLavaUpper.getWidth() + 1;
 		for (int i=0; i<lavaHorizontalTimes; i++) {
-			graphics.drawImage(mLavaUpper, i*mLavaUpper.getWidth(), Utils.SUELO_PX+mLavaUpper.getHeight()*2, null);
+			graphics.drawImage(mLavaUpper, i*mLavaUpper.getWidth(), GameUtils.SUELO_PX+mLavaUpper.getHeight()*2, null);
 		}
 		
-		int lavaVerticalTimes = (parentHeight - Utils.SUELO_PX) / mLavaRegular.getHeight() + 1;
+		int lavaVerticalTimes = (parentHeight - GameUtils.SUELO_PX) / mLavaRegular.getHeight() + 1;
 		for (int i=0; i<lavaHorizontalTimes; i++) {
 			for (int j=0; j<lavaVerticalTimes; j++) {
-				graphics.drawImage(mLavaRegular, i*mLavaRegular.getWidth(), Utils.SUELO_PX+mLavaUpper.getHeight()*3 + j*mLavaRegular.getHeight(), null);
+				graphics.drawImage(mLavaRegular, i*mLavaRegular.getWidth(), GameUtils.SUELO_PX+mLavaUpper.getHeight()*3 + j*mLavaRegular.getHeight(), null);
 			}
 		}
 		
+		// Nubes.
 		graphics.drawImage(mCloudSimple, mCloudSimple.getWidth()*2, mCloudSimple.getHeight()/2*3, null);
 		graphics.drawImage(mCloudSimple, parentWidth - mCloudSimple.getWidth()*3, mCloudSimple.getHeight()*3, null);
-		graphics.drawImage(mCloudDouble, mCloudDouble.getWidth()*6, mCloudDouble.getHeight()*4, null);
-		graphics.drawImage(mCloudDouble, parentWidth - mCloudDouble.getWidth()*4, mCloudDouble.getHeight()*7, null);
+		graphics.drawImage(mCloudDouble, mCloudDouble.getWidth()*6, mCloudDouble.getHeight()*3, null);
+		graphics.drawImage(mCloudDouble, parentWidth - mCloudDouble.getWidth()*4, mCloudDouble.getHeight()*6, null);
 		
-		// Decoration
-		graphics.drawImage(mMountainBig, mMountainBig.getWidth(), Utils.SUELO_PX - mMountainBig.getHeight(), null);
-		graphics.drawImage(mBushDouble, mBushSimple.getWidth(), Utils.SUELO_PX-2*Utils.PLANTA_ALTURA_PX - mBushSimple.getHeight(), null);
-		graphics.drawImage(mBushSimple, mBushSimple.getWidth()*4, Utils.SUELO_PX-4*Utils.PLANTA_ALTURA_PX - mBushSimple.getHeight(), null);
-		graphics.drawImage(mTree, mTree.getWidth()*3, Utils.SUELO_PX - 4*Utils.PLANTA_ALTURA_PX - mTree.getHeight(), null);
+		// Decorado.
+		graphics.drawImage(mMountainBig, mMountainBig.getWidth(), GameUtils.SUELO_PX - mMountainBig.getHeight(), null);
+		graphics.drawImage(mBushDouble, mBushSimple.getWidth(), GameUtils.SUELO_PX-2*GameUtils.PLANTA_ALTURA_PX - mBushSimple.getHeight(), null);
+		graphics.drawImage(mBushSimple, mBushSimple.getWidth()*4, GameUtils.SUELO_PX-4*GameUtils.PLANTA_ALTURA_PX - mBushSimple.getHeight(), null);
+		graphics.drawImage(mTree, mTree.getWidth()*3, GameUtils.SUELO_PX - 4*GameUtils.PLANTA_ALTURA_PX - mTree.getHeight(), null);
 		
-		// FLAG & CASTLE
-		graphics.drawImage(mCastle, parentWidth-mCastle.getWidth() - mCastle.getWidth()/2, Utils.SUELO_PX - mCastle.getHeight(), null);
-		graphics.drawImage(mFlag, parentWidth-mCastle.getWidth() - mCastle.getWidth()/2 - mFlag.getWidth()*2, Utils.SUELO_PX - mFlag.getHeight(), null);
+		// Bandera y Castillo.
+		graphics.drawImage(mCastle, parentWidth-mCastle.getWidth() - mCastle.getWidth()/2, GameUtils.SUELO_PX - mCastle.getHeight(), null);
+		graphics.drawImage(mFlag, parentWidth-mCastle.getWidth() - mCastle.getWidth()/2 - mFlag.getWidth()*2, GameUtils.SUELO_PX - mFlag.getHeight(), null);
 	}
 	
+	/**
+	 * Dibuja en pantalla lo que se mostrará encima de los personajes.
+	 * @param graphics
+	 * @param parentWidth
+	 * @param parentHeight
+	 * @param ascensorWidth
+	 */
 	public void drawInFrontOfCharacter(Graphics graphics, int parentWidth, int parentHeight, int ascensorWidth) {
-		//graphics.setColor(Color.DARK_GRAY);
-		//graphics.fillRect(0, Utils.SUELO_PX, parentWidth, parentHeight - Utils.SUELO_PX);
-		
-		int floorWidth = 3;
+		/*int floorWidth = 3;
 		graphics.setColor(Color.DARK_GRAY);
-		graphics.fillRect(0, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*1, parentWidth / 3 - ascensorWidth / 2, floorWidth);
-		graphics.fillRect(0, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*2, parentWidth / 3 - ascensorWidth / 2, floorWidth);
-		graphics.fillRect(0, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*3, parentWidth / 3 - ascensorWidth / 2, floorWidth);
-		graphics.fillRect(0, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*4, parentWidth / 3 - ascensorWidth / 2, floorWidth);
-		//graphics.fillRect(0, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*5, parentWidth / 3 - ascensorWidth / 2, floorWidth);
+		graphics.fillRect(0, GameUtils.SUELO_PX - GameUtils.PLANTA_ALTURA_PX*1, parentWidth / 3 - ascensorWidth / 2, floorWidth);
+		graphics.fillRect(0, GameUtils.SUELO_PX - GameUtils.PLANTA_ALTURA_PX*2, parentWidth / 3 - ascensorWidth / 2, floorWidth);
+		graphics.fillRect(0, GameUtils.SUELO_PX - GameUtils.PLANTA_ALTURA_PX*3, parentWidth / 3 - ascensorWidth / 2, floorWidth);
+		graphics.fillRect(0, GameUtils.SUELO_PX - GameUtils.PLANTA_ALTURA_PX*4, parentWidth / 3 - ascensorWidth / 2, floorWidth);
 		
-		graphics.fillRect(parentWidth/3 + ascensorWidth/2, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*1, parentWidth / 4, floorWidth);
-		graphics.fillRect(parentWidth/3 + ascensorWidth/2, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*2, parentWidth / 4, floorWidth);
-		graphics.fillRect(parentWidth/3 + ascensorWidth/2, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*3, parentWidth / 4, floorWidth);
-		graphics.fillRect(parentWidth/3 + ascensorWidth/2, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*4, parentWidth / 4, floorWidth);
-		//graphics.fillRect(parentWidth/3 + ascensorWidth/2, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*5, parentWidth / 4, floorWidth);
+		graphics.fillRect(parentWidth/3 + ascensorWidth/2, GameUtils.SUELO_PX - GameUtils.PLANTA_ALTURA_PX*1, parentWidth / 4, floorWidth);
+		graphics.fillRect(parentWidth/3 + ascensorWidth/2, GameUtils.SUELO_PX - GameUtils.PLANTA_ALTURA_PX*2, parentWidth / 4, floorWidth);
+		graphics.fillRect(parentWidth/3 + ascensorWidth/2, GameUtils.SUELO_PX - GameUtils.PLANTA_ALTURA_PX*3, parentWidth / 4, floorWidth);
+		graphics.fillRect(parentWidth/3 + ascensorWidth/2, GameUtils.SUELO_PX - GameUtils.PLANTA_ALTURA_PX*4, parentWidth / 4, floorWidth);
 		
-		graphics.fillRect(parentWidth/3 + ascensorWidth/2 + parentWidth / 4, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*6, 5, Utils.PLANTA_ALTURA_PX*5 + 3);
+		graphics.fillRect(parentWidth/3 + ascensorWidth/2 + parentWidth / 4, GameUtils.SUELO_PX - GameUtils.PLANTA_ALTURA_PX*6, 5, GameUtils.PLANTA_ALTURA_PX*5 + 3);
+		*/
 		
-		// FLOOR
+		// Suelo
 		int numBlocksWidthSection1 = ((parentWidth / 3 - ascensorWidth / 2) / mRegularBlock.getWidth()) +1;
 		int numBlocksHeight = (parentHeight / TILE_SIZE) + 1;
 		for (int i=0; i<numBlocksHeight; i++) {
 			for (int j=0; j<numBlocksWidthSection1; j++) {
-				graphics.drawImage(mRegularBlock, TILE_SIZE*j, Utils.SUELO_PX + (i*TILE_SIZE), null);
+				graphics.drawImage(mRegularBlock, TILE_SIZE*j, GameUtils.SUELO_PX + (i*TILE_SIZE), null);
 			}
 		}
 		
@@ -156,45 +173,45 @@ public class Background {
 		for (int i=0; i<numBlocksHeight; i++) {
 			for (int j=0; j<numBlocksWidthSection2; j++) {
 				//graphics.drawImage(mRegularBlock, 16*j, Utils.SUELO_PX + (i*TILE_SIZE), null);
-				graphics.drawImage(mRegularBlock, (parentWidth/3 + ascensorWidth/2) + j * mRegularBlock.getWidth(), Utils.SUELO_PX + (i*TILE_SIZE), null);
+				graphics.drawImage(mRegularBlock, (parentWidth/3 + ascensorWidth/2) + j * mRegularBlock.getWidth(), GameUtils.SUELO_PX + (i*TILE_SIZE), null);
 			}
 		}		
 		
-		// PLATFORMS
+		// Plataformas.
 		int plantaWidthSection1 = ((parentWidth / 3 - ascensorWidth / 2) / mRegularBlock.getWidth());
-		for (int i=1; i<Utils.PLANTA_MAX; i++) {
+		for (int i=1; i<GameUtils.PLANTA_MAX; i++) {
 			for (int j=0; j<plantaWidthSection1; j++) {
-				graphics.drawImage(mRegularBlock, j*mRegularBlock.getWidth(), Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX * i, null);
+				graphics.drawImage(mRegularBlock, j*mRegularBlock.getWidth(), GameUtils.SUELO_PX - GameUtils.PLANTA_ALTURA_PX * i, null);
 			}
 		}
 		
 		int plantaWidthSection2 = (((parentWidth/3 + ascensorWidth/2 + parentWidth / 4) - (parentWidth/3 + ascensorWidth/2)) / mRegularBlock.getWidth()) +1;
-		for (int i=1; i<Utils.PLANTA_MAX; i++) {
+		for (int i=1; i<GameUtils.PLANTA_MAX; i++) {
 			for (int j=0; j<plantaWidthSection2; j++) {
-				graphics.drawImage(mRegularBlock, (parentWidth/3 + ascensorWidth/2) + j * mRegularBlock.getWidth(), Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX * i, null);
+				graphics.drawImage(mRegularBlock, (parentWidth/3 + ascensorWidth/2) + j * mRegularBlock.getWidth(), GameUtils.SUELO_PX - GameUtils.PLANTA_ALTURA_PX * i, null);
 			}
 		}
 		
-		// PIPES
+		// Tuberías.
 		int numPipesVertical = (parentHeight / mPipeVertical.getHeight()) + 1;
 		for (int i=0; i<numPipesVertical; i++) {
 			graphics.drawImage(mPipeVertical, parentWidth/3 + ascensorWidth/2 + parentWidth / 4, i*mPipeVertical.getHeight(), null);
 		}
 		
-		for (int i=0; i<Utils.PLANTA_MAX; i++) {
-			graphics.drawImage(mPipeFromLeft, parentWidth/3 + ascensorWidth/2 + parentWidth /4 - mPipeVertical.getWidth() - 6, Utils.SUELO_PX - mPipeFromLeft.getHeight() - i*Utils.PLANTA_ALTURA_PX, null);
+		for (int i=0; i<GameUtils.PLANTA_MAX; i++) {
+			graphics.drawImage(mPipeFromLeft, parentWidth/3 + ascensorWidth/2 + parentWidth /4 - mPipeVertical.getWidth() - 6, GameUtils.SUELO_PX - mPipeFromLeft.getHeight() - i*GameUtils.PLANTA_ALTURA_PX, null);
 		}
 		
-		graphics.drawImage(mPipeToRight, parentWidth/3 + ascensorWidth/2 + parentWidth/4 + mPipeVertical.getWidth() - mPipeVertical.getWidth()/2, Utils.SUELO_PX - mPipeToRight.getHeight(), null);
+		graphics.drawImage(mPipeToRight, parentWidth/3 + ascensorWidth/2 + parentWidth/4 + mPipeVertical.getWidth() - mPipeVertical.getWidth()/2, GameUtils.SUELO_PX - mPipeToRight.getHeight(), null);
 		
-		// indicators
+		// Indicadores de solicitud del ascensor.
 		int baseX = plantaWidthSection1*mRegularBlock.getWidth();
-		for (int i=0; i<Utils.PLANTA_MAX; i++) {
+		for (int i=0; i<GameUtils.PLANTA_MAX; i++) {
 			if (mIndicators.get(i) < 0) {
-				graphics.drawImage(mBlockQuestion, baseX, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*i, null);
+				graphics.drawImage(mBlockQuestion, baseX, GameUtils.SUELO_PX - GameUtils.PLANTA_ALTURA_PX*i, null);
 			} else {
-				graphics.drawImage(mBlockNoQuestion, baseX, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*i, null);
-				graphics.drawImage(mNumbers[mIndicators.get(i)], baseX + mBlockNoQuestion.getWidth()/2 - mNumbers[mIndicators.get(i)].getWidth()/2, Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*i + mBlockNoQuestion.getHeight()/2 - mNumbers[mIndicators.get(i)].getHeight()/2, null);
+				graphics.drawImage(mBlockNoQuestion, baseX, GameUtils.SUELO_PX - GameUtils.PLANTA_ALTURA_PX*i, null);
+				graphics.drawImage(mNumbers[mIndicators.get(i)], baseX + mBlockNoQuestion.getWidth()/2 - mNumbers[mIndicators.get(i)].getWidth()/2, GameUtils.SUELO_PX - GameUtils.PLANTA_ALTURA_PX*i + mBlockNoQuestion.getHeight()/2 - mNumbers[mIndicators.get(i)].getHeight()/2, null);
 				//graphics.drawString(String.valueOf(mIndicators.get(i)), plantaWidthSection1*mRegularBlock.getWidth(), Utils.SUELO_PX - Utils.PLANTA_ALTURA_PX*i);
 			}
 		}

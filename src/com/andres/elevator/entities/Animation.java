@@ -2,6 +2,12 @@ package com.andres.elevator.entities;
 
 import java.awt.image.BufferedImage;
 
+/**
+ * Clase encarga de animar el movimiento de los personajes.
+ * 
+ * @author Andrés Hernández Jiménez
+ *
+ */
 public class Animation {
 
 	private BufferedImage[] frames;
@@ -16,6 +22,11 @@ public class Animation {
 		playedOnce = false;
 	}
 	
+	/**
+	 * Método encargado de establecer un nuevo array de frames.
+	 * 
+	 * @param frames
+	 */
 	public void setFrames(BufferedImage[] frames) {
 		this.frames = frames;
 		currentFrame = 0;
@@ -31,6 +42,9 @@ public class Animation {
 		currentFrame = i;
 	}
 	
+	/**
+	 * Método encargado de actualizar el frame actual.
+	 */
 	public void update() {
 		if (delay == -1) {
 			return;

@@ -2,7 +2,7 @@ package com.andres.elevator.utils;
 
 import java.util.Random;
 
-public class Utils {
+public class GameUtils {
 	
 	public static final int PLANTA_MAX = 5;
 	public static final int PLANTA_MIN = 0;

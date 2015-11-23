@@ -3,32 +3,32 @@ package com.andres.elevator.entities;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.andres.elevator.applet.Edificio;
-import com.andres.elevator.utils.Utils;
+import com.andres.elevator.applet.Game;
+import com.andres.elevator.utils.GameUtils;
 
 public class PrizeFactory {
 
-	public static Prize newInstance(Edificio edificio, int ascensorWidth) {
+	public static Prize newInstance(Game game, int ascensorWidth) {
 		Prize prize;
 		
-		int randomPrize = Utils.getRandomValue(0, 2);
+		int randomPrize = GameUtils.getRandomValue(0, 2);
 		if (randomPrize == 0) {
-			prize = new Mushroom(edificio.getWidth(), ascensorWidth);
+			prize = new Mushroom(game.getWidth(), ascensorWidth);
 		} else if (randomPrize == 1) {
-			prize = new Flower(edificio.getWidth(), ascensorWidth);
+			prize = new Flower(game.getWidth(), ascensorWidth);
 		} else {
-			prize = new Enemy(edificio.getWidth(), ascensorWidth);
+			prize = new Enemy(game.getWidth(), ascensorWidth);
 		}
 		
-		prize.setPlanta(generateRandomPlanta(edificio));
+		prize.setPlanta(generateRandomPlanta(game));
 		
 		return prize;
 	}
 	
-	private static int generateRandomPlanta(Edificio edificio) {
+	private static int generateRandomPlanta(Game game) {
 		List<Integer> plantasLibres = new ArrayList<>();
-		for (int i=0; i<Utils.PLANTA_MAX; i++) {
-			if (edificio.isPlantaSinPremio(i)) {
+		for (int i=0; i<GameUtils.PLANTA_MAX; i++) {
+			if (game.isPlantaSinPremio(i)) {
 				plantasLibres.add(i);
 			}
 		}
@@ -37,7 +37,7 @@ public class PrizeFactory {
 			throw new IllegalStateException("No hay plantas libres para generar un nuevo premio.");
 		}
 		
-		int n = Utils.getRandomValue(0, plantasLibres.size()-1);
+		int n = GameUtils.getRandomValue(0, plantasLibres.size()-1);
 		return plantasLibres.get(n);
 	}
 	

@@ -6,12 +6,12 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
-import com.andres.elevator.applet.Edificio;
+import com.andres.elevator.applet.Game;
 
-public class Mario extends Persona {
+public class Mario extends Character {
 
-	Mario(Edificio edificio, Ascensor ascensor) {
-		super(edificio, ascensor);
+	Mario(Game game, Ascensor ascensor) {
+		super(game, ascensor);
 	}
 
 	@Override

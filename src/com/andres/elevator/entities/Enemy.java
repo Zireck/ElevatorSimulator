@@ -2,7 +2,7 @@ package com.andres.elevator.entities;
 
 import java.awt.image.BufferedImage;
 
-import com.andres.elevator.utils.Utils;
+import com.andres.elevator.utils.GameUtils;
 
 public class Enemy extends Prize {
 	
@@ -26,7 +26,7 @@ public class Enemy extends Prize {
 	}
 	
 	private void loadRandomSprite() {
-		int enemy = Utils.getRandomValue(0, MAX_ENEMIES);
+		int enemy = GameUtils.getRandomValue(0, MAX_ENEMIES);
 		switch (enemy) {
 			case BOWSER:
 				mSprite = getSpriteSheet().getSubimage(13, 896, 32, 32);
@@ -57,5 +57,4 @@ public class Enemy extends Prize {
 	protected BufferedImage getPrizeSprite() {
 		return mSprite;
 	}
-
 }

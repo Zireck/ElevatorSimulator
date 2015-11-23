@@ -19,5 +19,4 @@ public class Flower extends Prize {
 	protected BufferedImage getPrizeSprite() {
 		return mSprite;
 	}
-
 }
