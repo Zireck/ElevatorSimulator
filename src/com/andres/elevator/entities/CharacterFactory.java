@@ -21,19 +21,19 @@ public class CharacterFactory {
 	 * @return Personaje creado.
 	 */
 	public static Character newInstance(Game game, Ascensor ascensor) {
-		Character persona;
+		Character personaje;
 		
 		int characterRandom = GameUtils.getRandomValue(0, 1);
 		if (characterRandom == 0) {
-			persona = new Mario(game, ascensor);
+			personaje = new Mario(game, ascensor);
 		} else {
-			persona = new Luigi(game, ascensor);
+			personaje = new Luigi(game, ascensor);
 		}
 		
-		persona.setPlantaOrigen(generarPlantaDeOrigen(game));
-		persona.setPlantaDestino(generarPlantaDeDestino(game, persona.getPlantaOrigen()));
+		personaje.setPlantaOrigen(generarPlantaDeOrigen(game));
+		personaje.setPlantaDestino(generarPlantaDeDestino(game, personaje.getPlantaOrigen()));
 		
-		return persona;
+		return personaje;
 	}
 	
 	/**
@@ -44,7 +44,7 @@ public class CharacterFactory {
 	private static int generarPlantaDeOrigen(Game game) {
 		List<Integer> plantasLibres = new ArrayList<>();
 		for (int i=0; i<GameUtils.PLANTA_MAX; i++) {
-			if (game.isPlantaSinJugadores(i)) {
+			if (game.isPlantaSinPersonajes(i)) {
 				plantasLibres.add(i);
 			}
 		}

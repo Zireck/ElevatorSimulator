@@ -27,8 +27,8 @@ public class Ascensor extends Entity implements Runnable {
 	private Thread mThread;
 
 	private LinkedList<Character> mColaDeEspera = new LinkedList<Character>();
-	private Character mPersonaSolicitante;
-	private Character mPersonaMontada;
+	private Character mPersonajeSolicitante;
+	private Character mPersonajeMontado;
 	
 	private int mPlantaActual = 0;
 	
@@ -64,14 +64,14 @@ public class Ascensor extends Entity implements Runnable {
 	
 	/**
 	 * Método sincronizado que los hilos personaje van llamando para solicitar el ascensor.
-	 * @param personaSolicitante
+	 * @param personajeSolicitante
 	 */
-	public synchronized void solicitar(Character personaSolicitante) {
+	public synchronized void solicitar(Character personajeSolicitante) {
 		// Se añade el hilo a la cola de espera.
-		mColaDeEspera.add(personaSolicitante);
+		mColaDeEspera.add(personajeSolicitante);
 		
 		// Mientras el hilo se encuentre en la cola de espera, ponerse a dormir.
-		while (mColaDeEspera.contains(personaSolicitante)) {
+		while (mColaDeEspera.contains(personajeSolicitante)) {
 			try {
 				wait();
 			} catch (InterruptedException e) {
@@ -80,16 +80,16 @@ public class Ascensor extends Entity implements Runnable {
 		}
 		
 		// Finalmente se atiende al hilo.
-		mPersonaSolicitante = personaSolicitante;
+		mPersonajeSolicitante = personajeSolicitante;
 	}
 
 	@Override
 	public void run() {
 		while (!mDetener) {
-			if (mPersonaMontada != null) {
-				transportarPersona();
-			} else if (mPersonaSolicitante != null) {
-				buscarPersona();
+			if (mPersonajeMontado != null) {
+				transportarPersonaje();
+			} else if (mPersonajeSolicitante != null) {
+				buscarPersonaje();
 			} else {
 				// El hilo ascensor se echa a dormir en caso de que no haya ningún hilo en la cola de espera.
 				if (mColaDeEspera.size() <= 0) {
@@ -119,11 +119,11 @@ public class Ascensor extends Entity implements Runnable {
 	 * - En caso de encontrarse en la misma planta del personaje al que debe recoger, lo recoge.
 	 * - En caso contrario se mueve hacia la planta donde se encuentra el personaje esperando.
 	 */
-	private void buscarPersona() {
-		if (mPlantaActual == mPersonaSolicitante.getPlantaOrigen()) {
-			recogerPersona();
+	private void buscarPersonaje() {
+		if (mPlantaActual == mPersonajeSolicitante.getPlantaOrigen()) {
+			recogerPersonaje();
 		} else {
-			if (mPlantaActual < mPersonaSolicitante.getPlantaOrigen()) {
+			if (mPlantaActual < mPersonajeSolicitante.getPlantaOrigen()) {
 				mover(mPlantaActual + 1);
 			} else {
 				mover(mPlantaActual - 1);
@@ -134,9 +134,9 @@ public class Ascensor extends Entity implements Runnable {
 	/**
 	 * Recoge un personaje y lo monta en el ascensor.
 	 */
-	private void recogerPersona() {
-		mPersonaMontada = mPersonaSolicitante;
-		mPersonaMontada.setX(mPersonaMontada.getX() + getWidth() / 2 + mPersonaMontada.getWidth() / 2);
+	private void recogerPersonaje() {
+		mPersonajeMontado = mPersonajeSolicitante;
+		mPersonajeMontado.setX(mPersonajeMontado.getX() + getWidth() / 2 + mPersonajeMontado.getWidth() / 2);
 	}
 	
 	/**
@@ -144,11 +144,11 @@ public class Ascensor extends Entity implements Runnable {
 	 * - En caso de haber llegado, lo suelta.
 	 * - En caso contrario, el ascensor se mueve hacia la planta de destino.
 	 */
-	private void transportarPersona() {
-		if (mPlantaActual == mPersonaMontada.getPlantaDestino()) {
-			soltarPersona();
+	private void transportarPersonaje() {
+		if (mPlantaActual == mPersonajeMontado.getPlantaDestino()) {
+			soltarPersonaje();
 		} else {
-			if (mPlantaActual < mPersonaMontada.getPlantaDestino()) {
+			if (mPlantaActual < mPersonajeMontado.getPlantaDestino()) {
 				mover(mPlantaActual + 1);
 			} else {
 				mover(mPlantaActual - 1);
@@ -159,13 +159,13 @@ public class Ascensor extends Entity implements Runnable {
 	/**
 	 * Saca al personaje del ascensor y lo colca en el suelo.
 	 */
-	private void soltarPersona() {
-		int movimientoHorizontal = getWidth() / 2 + mPersonaMontada.getWidth() / 2;
-		mPersonaMontada.setX(mPersonaMontada.getX() + movimientoHorizontal);
+	private void soltarPersonaje() {
+		int movimientoHorizontal = getWidth() / 2 + mPersonajeMontado.getWidth() / 2;
+		mPersonajeMontado.setX(mPersonajeMontado.getX() + movimientoHorizontal);
 		
-		mPersonaMontada.haLlegado();
-		mPersonaSolicitante = null;
-		mPersonaMontada = null;
+		mPersonajeMontado.haLlegado();
+		mPersonajeSolicitante = null;
+		mPersonajeMontado = null;
 	}
 	
 	/**
@@ -179,11 +179,11 @@ public class Ascensor extends Entity implements Runnable {
 			mY += mMovimiento;
 		}
 		
-		if (mPersonaMontada != null) {
+		if (mPersonajeMontado != null) {
 			if (mPlantaActual < plantaDestino) {
-				mPersonaMontada.setY(mPersonaMontada.getY() - mMovimiento);
+				mPersonajeMontado.setY(mPersonajeMontado.getY() - mMovimiento);
 			} else {
-				mPersonaMontada.setY(mPersonaMontada.getY() + mMovimiento);
+				mPersonajeMontado.setY(mPersonajeMontado.getY() + mMovimiento);
 			}
 		}
 		

@@ -26,7 +26,7 @@ public class Game extends Applet implements Runnable {
 	private Background mBackground;
 	private Ascensor mAscensor;
 	private List<Character> mPersonajes = new ArrayList<Character>(MAX_PERSONAJES);
-	private List<Boolean> mPlantasSinJugadores = new ArrayList<Boolean>(MAX_PLANTAS);
+	private List<Boolean> mPlantasSinPersonajes = new ArrayList<Boolean>(MAX_PLANTAS);
 	
 	private List<Prize> mPrizes = new ArrayList<Prize>(MAX_PRIZES);
 	private List<Boolean> mPlantasSinPremios = new ArrayList<Boolean>(MAX_PLANTAS);
@@ -44,7 +44,7 @@ public class Game extends Applet implements Runnable {
 		setVisible(true);
 
 		for (int i=0; i<MAX_PLANTAS; i++) {
-			mPlantasSinJugadores.add(true);
+			mPlantasSinPersonajes.add(true);
 			mPlantasSinPremios.add(true);
 		}
 		
@@ -101,8 +101,8 @@ public class Game extends Applet implements Runnable {
 	 */
 	private void crearNuevoPersonajeSiFueraPosible() {
 		boolean algunaPlantaLibre = false;
-		for (int i=0; i<mPlantasSinJugadores.size(); i++) {
-			if (mPlantasSinJugadores.get(i)) {
+		for (int i=0; i<mPlantasSinPersonajes.size(); i++) {
+			if (mPlantasSinPersonajes.get(i)) {
 				algunaPlantaLibre = true;
 			}
 		}
@@ -110,10 +110,10 @@ public class Game extends Applet implements Runnable {
 		// El personaje se crea si no excede la capacidad máxima de personajes permitidos simultáneamente
 		// y si existe alguna planta libre donde poder crearlo.
 		if (mPersonajes.size() < MAX_PERSONAJES && algunaPlantaLibre) {
-			Character persona = CharacterFactory.newInstance(this, mAscensor);
-			mPlantasSinJugadores.set(persona.getPlantaOrigen(), false);
-			persona.executeThread();
-			mPersonajes.add(persona);
+			Character personaje = CharacterFactory.newInstance(this, mAscensor);
+			mPlantasSinPersonajes.set(personaje.getPlantaOrigen(), false);
+			personaje.executeThread();
+			mPersonajes.add(personaje);
 		}
 	}
 	
@@ -121,12 +121,12 @@ public class Game extends Applet implements Runnable {
 	 * Elimina los personajes que ya han finalizado su trayecto al completo.
 	 */
 	private void eliminarPersonajesFinalizados() {
-		Iterator<Character> iteratorPersonas = mPersonajes.iterator();
-		while (iteratorPersonas.hasNext()) {
-			Character persona = iteratorPersonas.next();
-			if (persona.haFinalizado()) {
-				persona = null;
-				iteratorPersonas.remove();
+		Iterator<Character> iteratorPersonajes = mPersonajes.iterator();
+		while (iteratorPersonajes.hasNext()) {
+			Character personaje = iteratorPersonajes.next();
+			if (personaje.haFinalizado()) {
+				personaje = null;
+				iteratorPersonajes.remove();
 			}
 		}
 	}
@@ -189,26 +189,26 @@ public class Game extends Applet implements Runnable {
 			}
 		}
 		
-		for (Character persona : mPersonajes) {
-			if (persona != null && !persona.isDead()) {
+		for (Character personaje : mPersonajes) {
+			if (personaje != null && !personaje.isDead()) {
 				for (int i=0; i<mPrizes.size(); i++) {
 					Prize prize = mPrizes.get(i);
-					if (persona.isCollidingWith(prize)) {
-						persona.consumePrize(prize);
+					if (personaje.isCollidingWith(prize)) {
+						personaje.consumePrize(prize);
 						prize.consume();
 						mPlantasSinPremios.set(prize.getPlanta(), true);
 					}
 				}
 				
-				persona.draw(mDoubleBufferGraphics);
+				personaje.draw(mDoubleBufferGraphics);
 			}
 		}
 		
 		mBackground.drawInFrontOfCharacter(mDoubleBufferGraphics, getWidth(), getHeight(), mAscensor.getWidth());
 		
-		for (Character persona : mPersonajes) {
-			if (persona.isDead()) {
-				persona.draw(mDoubleBufferGraphics);
+		for (Character personaje : mPersonajes) {
+			if (personaje.isDead()) {
+				personaje.draw(mDoubleBufferGraphics);
 			}
 		}
 		
@@ -228,12 +228,12 @@ public class Game extends Applet implements Runnable {
 		mBackground.setIndicator(plantaOrigen, plantaDestino);
 	}
 	
-	public boolean isPlantaSinJugadores(int planta) {
-		return mPlantasSinJugadores.get(planta);
+	public boolean isPlantaSinPersonajes(int planta) {
+		return mPlantasSinPersonajes.get(planta);
 	}
 	
-	public void setPlantaSinJugadores(int planta, boolean isAvailable) {
-		mPlantasSinJugadores.set(planta, isAvailable);
+	public void setPlantaSinPersonajes(int planta, boolean isAvailable) {
+		mPlantasSinPersonajes.set(planta, isAvailable);
 	}
 	
 	public boolean isPlantaSinPremio(int planta) {

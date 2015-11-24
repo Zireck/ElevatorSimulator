@@ -146,7 +146,7 @@ public abstract class Character extends Entity implements Runnable {
 		// notificamos que la planta de origen está disponible para que pueda entrar otro personaje.
 		mPlantaActual = mPlantaDestino;
 		mGame.setIndicator(mPlantaOrigen, -1);
-		mGame.setPlantaSinJugadores(mPlantaOrigen, true);
+		mGame.setPlantaSinPersonajes(mPlantaOrigen, true);
 		
 		// El personaje retoma su marcha y lo hace hasta que sale de la pantalla.
 		// Bien sea por haber terminado su trayecto o por haber muerto en el camino.
@@ -236,7 +236,6 @@ public abstract class Character extends Entity implements Runnable {
 		mCurrentState = STATE_REGULAR;
 		mCurrentAction = WALKING_REGULAR;
 		mAnimation.setFrames(mSprites.get(mCurrentAction));
-		System.out.println("k9d3 array sprites length: " + mSprites.get(mCurrentAction).length);
 	}
 	
 	private void eatFlower() {
